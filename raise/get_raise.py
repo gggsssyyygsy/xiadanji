@@ -19,7 +19,7 @@ import time
 import datetime
 
 #URL现在是按价格降序排列
-brand_dict = {"target":[300, 3], "best-buy":[98, 5], "sephora":[90, 7]}#, "saks-fifth-avenue":[450, 10]}
+brand_dict = {"best-buy":[98, 5], "sephora":[90, 7], "saks-fifth-avenue":[450, 10], "nordstrom":[93,7]}
 
 sleep_time = 5 
 #to_list = ['shushuz2@outlook.com','goodluckday2@icloud.com', 'jcaxxq1@gmail.com', 'gucasuw@gmail.com', 'wangpeicivil@gmail.com','lc890213@gmail.com', 'gusiyuan090840@gmail.com']
@@ -95,7 +95,7 @@ def send_mail(server, fro, to, subject, text, files=[]):
     smtp.sendmail(fro, to, msg.as_string())   
     smtp.close() 
 
-def def loadConfig(filename):
+def loadConfig(filename):
     ''' load your config.csv file
       the file should contain username, password in each line
       make sure the file is under the same directory '''
