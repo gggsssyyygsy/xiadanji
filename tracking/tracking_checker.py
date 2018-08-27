@@ -17,9 +17,9 @@ def tracking_spliter():
                 for item in row:
                     item=item.replace('\xc2', '')
                     item=item.replace('\xa0', '')
-                    trackings.append(item)
-    for i in range(0, len(trackings)):
-        trackings[i] = trackings[i].strip()
+                    split_items = item.split(';')
+                    for split_item in split_items:
+                        trackings.append(split_item.strip())
     my_trackings = set(trackings)
     return my_trackings
 
@@ -41,7 +41,7 @@ def check_sl33(my_trackings):
                 if not qty:
                     continue
                 for my_tracking in my_trackings:
-                    if my_tracking in tracking:
+                    if my_tracking in tracking or tracking in my_tracking or tracking == my_tracking:
                         if item in item_counter:
                             item_counter[item] += int(qty)
                         else:
