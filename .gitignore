@@ -1,0 +1,5 @@
+config.csv
+config.py
+.idea/
+*.pyc
+env/
