@@ -19,7 +19,7 @@ from email.header import decode_header
 class message:
     def __init__(self, fetched_email, *args, **kwargs):
         
-        accepted_types = kwargs.get('types', ['text/plain'])
+        accepted_types = kwargs.get('types', ['text/plain', 'text/html'])
         parsed = email.message_from_string(fetched_email)
         self.parsed_email = parsed
         self.receiver_addr = parsed['to']
@@ -27,7 +27,7 @@ class message:
         self.date = parsed['date']
         self.datetime = None
         if self.date:
-            self.datetime = parse(self.date).replace(tzinfo=None)
+            self.datetime = parse(self.date.split('(')[0]).replace(tzinfo=None)
         self.subject = parsed['subject']
         if self.subject and ('=?utf-8?' in self.subject.lower() or '=?windows-1252?' in self.subject.lower()):
             subject=decode_header(self.subject)
@@ -36,11 +36,13 @@ class message:
         self.body = ''
         if parsed.is_multipart():
             for part in parsed.walk():
-                if part.get_content_type() in accepted_types:
-                    self.body = part.get_payload()
+                charset = part.get_content_charset()
+                if part.get_content_type() in accepted_types and charset:
+                    self.body = unicode(part.get_payload(decode=True), str(charset), "ignore").encode('utf8', 'replace').strip()
         else:
-            if parsed.get_content_type() in accepted_types:
-                self.body = parsed.get_payload()
+            charset = parsed.get_content_charset()
+            if parsed.get_content_type() in accepted_types and charset:
+                self.body = unicode(parsed.get_payload(decode=True), charset, 'ignore').encode('utf8', 'replace').strip()
 
     def __repr__(self):
         return "<Msg from: {0}>".format(self.sender_addr)
