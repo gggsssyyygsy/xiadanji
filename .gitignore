@@ -3,3 +3,5 @@ config.py
 .idea/
 *.pyc
 env/
+.DS_Store
+_DS_Store
