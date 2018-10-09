@@ -19,7 +19,7 @@ import datetime
 sleep_time = 5 
 price_bar1 = 100
 price_bar2 = 100
-percentage_bar1 = 5 
+percentage_bar1 = 1 
 percentage_bar2 = 5
 brand = "best-buy"
 url = 'https://www.raise.com/buy-{}-gift-cards?page=1&per=25'.format(brand)
@@ -96,7 +96,7 @@ def send_mail(server, fro, to, subject, text, files=[]):
     smtp.sendmail(fro, to, msg.as_string())   
     smtp.close() 
 
-def def loadConfig(filename):
+def loadConfig(filename):
     ''' load your config.csv file
       the file should contain username, password in each line
       make sure the file is under the same directory '''
@@ -119,9 +119,9 @@ def kevin_send_gmail(subject, text, files=[]):
     server['password'] = password
     fro = server['user']# + '@gmail.com'
     to = to_list# + '@gmail.com'
-    send_mail(server, fro, to, subject, text, files)last_price = 0
+    send_mail(server, fro, to, subject, text, files)
 
-
+last_price = 0
 last_percentage = 0
 last_e = ''
 

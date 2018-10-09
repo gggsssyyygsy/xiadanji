@@ -5,23 +5,27 @@ import string
 wb = load_workbook(filename = '/Users/kevin/Downloads/wendy.xlsx')
 sheet_ranges = wb['Sheet1']
 rows = []
-for i in range(1,105):
+trackings = {}
+total = 0
+item_name = 'Apple Watch Series 3 42mm'
+id = '12863'
+for i in range(1,148):
     row = []
-    for j in list(string.ascii_uppercase)[:4]:
+    for j in list(string.ascii_uppercase)[:1]:
         cell = '{}{}'.format(j,i)
-        if not sheet_ranges[cell].value:
-            continue
-        if j != 'D':
-            try:
-                row.append(str(int(sheet_ranges[cell].value)))
-            except:
-                row.append(str(sheet_ranges[cell].value))
-        else:
-            row.append(int(str(sheet_ranges[cell].value)[0]))
-    if row:
-        rows.append(row)
+        if j == 'A':
+            tracking = sheet_ranges[cell].value
+            if tracking not in trackings:
+                trackings[tracking] = 0
+            trackings[tracking] += int(sheet_ranges['D{}'.format(i)].value)
+        print (tracking, trackings[tracking])
+for tracking in trackings:
+    row = [tracking, item_name, id, trackings[tracking]]
+    rows.append(row)
+    total += trackings[tracking]
 
 print (rows)
+print (total)
 wb = Workbook()
 
 # grab the active worksheet
