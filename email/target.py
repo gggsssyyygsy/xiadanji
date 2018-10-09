@@ -1,34 +1,23 @@
 from gmail.gmaillib import account, message
 from email.header import decode_header
+from gmail.helper import loadConfig
+
 
 username, password = loadConfig("gmail/config.csv")
 
 keywords = ['qty:', 'Tracking #']
-'''
-         'Pokken Tournament Nintendo Wii U',
-         'Super Mario Maker Nintendo Wii U',
-         'New Super Mario Bros U + New Super Luigi U Nintendo Wii U',
-         'Razer Lancehead Tournament Gaming Mouse',
-         'Pokemon X Nintendo 3DS',
-         'Pokemon Y Nintendo 3DS',
-         'Nintendo Switch Super Mario Odyssey Edition',
-         'Nintendo&#174; 2DS - Scarlet Red with New Super Mario Bros. 2Game Pre-Installed',
-         'Nintendo&#174; 2DS Bundle with Mario Kart 7 - Electric Blue',
-         'Ring Stick Up Cam Outdoor Security Camera - Black',
-         'Nintendo&#174; Switch&#153; with Neon Blue and Neon Red Joy-Con&#153;',
-         'Amazon Kindle Paperwhite, Wi-Fi, Special Offers - Black',
-         'PlayStation&#174; 4 1TB Console',
-         'Amazon Fire TV Stick with Alexa Voice Remote',
-         'Google Chromecast'
-         'Epson WorkForce WF-3640 Wireless All-in-One Printer',
-         'PlayStation 4 Pro Destiny 2 Limited Edition Bundle',
-         "Xbox One S 1TB Assassin's Creed Origins Bonus Bundle",
-         'PlayStation&#174; 4 1TB Console',
-         'Acer Chromebook 15, Celeron N3060, 15.6" HD, 2GB LPDDR3, 16GB Storage, CB3-532-C3F7',
-'''
 items = [
+         'Amazon Fire TV with 4K Ultra HD and Alexa Voice Remote',
+         'Fire HD 8 with Alexa (8&quot; HD Display) Black - 16GB',
          'Amazon Fire TV Stick with Alexa Voice Remote',
+         'Fire 7 with Alexa (7&quot; Display Tablet) Black - 8GB',
+         "Harry's Men's Razor Blade Refills - 4ct",
+         "Harry's Men's Razor Blade Refills - 8ct",
+         "Harry's Men's Shave Cream - 3.4oz",
+         "Harry's Shaving Set - 4pk",
          ]
+
+shipping_subject_keywords = ['Target!!!!!!!']
 
 def get_trackings(emails):
     order_counter = {} #{order# : {item: {qty:0, trackings:[]}}
@@ -40,41 +29,45 @@ def get_trackings(emails):
         subject = email.subject
         if not subject:
             continue
-        if 'Good news! Your order #' in subject or 'Good news! Items have shipped from your order #' in subject:
+        if shipping_subject_keywords[0] in subject:
+            '''
             if 'Good news! Your order #' in subject:
                 order_number = subject.split('Good news! Your order #')[1][:13]
             else:
                 order_number = subject.split('Good news! Items have shipped from your order #')[1][:13]
+            '''
+            order_number = 1
             #initialize order counter
-            content = str(email.parsed_email)
+            content = email.body
+            print content
             #get tracking
             trackings = content.split('Tracking # ')
             for i in range(1, len(trackings)):
-                tracking = trackings[i][:30].strip().split(' ')[0]
-            #get item and qty
-            parts = content.split('qty: ')
-            for i in range(0, len(parts) - 1):
-                for item in items:
-                    if item in parts[i]:
-                        try:
-                            qty = int(parts[i + 1][0] + parts[i + 1][1])
-                        except:
-                            qty = int(parts[i + 1][0])
-                        if tracking in item_counter[item]['trackings']:
-                            continue
-                        item_counter[item]['qty'] += qty
-                        item_counter[item]['trackings'].append(tracking)
-                        print tracking, qty
-                        if order_number not in order_counter:
-                            order_counter[order_number] = {}
-                        if item in order_counter[order_number]:
-                            order_counter[order_number][item]['qty'] += qty
-                            order_counter[order_number][item]['trackings'].append(tracking)
-                        else:
-                            order_counter[order_number][item] = {}
-                            order_counter[order_number][item]['qty'] = qty
-                            order_counter[order_number][item]['trackings']=[tracking]
-                        break
+                tracking = trackings[i][:18].strip().split(' ')[0]
+                #get item and qty
+                parts = trackings[i].split('qty: ')
+                for j in range(0, len(parts) - 1):
+                    for item in items:
+                        if item in parts[j]:
+                            try:
+                                qty = int(parts[j + 1][0])
+                            except:
+                                qty = int(parts[j + 1][0])
+                            if (tracking,qty) in item_counter[item]['trackings']:
+                                continue
+                            item_counter[item]['qty'] += qty
+                            item_counter[item]['trackings'].append((tracking,qty))
+                            print tracking, qty
+                            if order_number not in order_counter:
+                                order_counter[order_number] = {}
+                            if item in order_counter[order_number]:
+                                order_counter[order_number][item]['qty'] += qty
+                                order_counter[order_number][item]['trackings'].append((tracking,qty))
+                            else:
+                                order_counter[order_number][item] = {}
+                                order_counter[order_number][item]['qty'] = qty
+                                order_counter[order_number][item]['trackings']=[(tracking,qty)]
+                            break
         else:
             continue
 
@@ -137,26 +130,28 @@ def get_canceled_orders(emails):
 if __name__ == '__main__':
     error_orders = []
     g_account = None
-    g_account = account(username, password)
-    emails = g_account.inbox(start=0, amount=1000, date='11/15/2017')
+    g_account = account(username[0], password[0])
+    emails = g_account.inbox(start=0, amount=20, date='09/05/2018')
     shipped_item_counter, shipped_order_counter = get_trackings(emails)
-    canceled_orders = get_canceled_orders(emails)
-    item_counter, order_counter = get_order_confirmations(emails, canceled_orders)
+    #canceled_orders = get_canceled_orders(emails)
+    #item_counter, order_counter = get_order_confirmations(emails, canceled_orders)
 
     for item in items:
         print item
-        print 'qty: ', item_counter[item]['qty']
+        #print 'qty: ', item_counter[item]['qty']
         print 'shipped qty: ', shipped_item_counter[item]['qty']
-        print shipped_item_counter[item]['trackings']
-
+        for tracking in shipped_item_counter[item]['trackings']:
+            print tracking[0], tracking[1]
+    
     for order_number in shipped_order_counter:
-        if order_number not in order_counter:
-            error_orders.append(order_number)
-            continue
+        #if order_number not in order_counter:
+        #    error_orders.append(order_number)
+        #    continue
         for item in shipped_order_counter[order_number]:
             shipped_qty = shipped_order_counter[order_number][item]['qty']
-            order_counter[order_number][item]['qty'] -= shipped_qty
+            #order_counter[order_number][item]['qty'] -= shipped_qty
 
+    '''
     for order_number in order_counter:
         flag = True
         for item in order_counter[order_number]:
@@ -171,3 +166,4 @@ if __name__ == '__main__':
 
     print 'These Orders Have Problems, check manually!!!', error_orders
     print 'These Orders got canceled, check manually!!!', canceled_orders
+    '''
